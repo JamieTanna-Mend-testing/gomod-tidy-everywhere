@@ -1,0 +1,5 @@
+module github.com/JamieTanna-Mend-testing/gomod-tidy-everywhere/not/affected
+
+go 1.20
+
+require github.com/google/uuid v1.6.0
