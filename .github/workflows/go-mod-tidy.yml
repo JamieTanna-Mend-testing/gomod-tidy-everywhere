@@ -1,0 +1,43 @@
+name: Go Mod Tidy Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-go-mod-tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Find and tidy all go.mod files
+        run: |
+          set -e
+          echo "Finding all go.mod files..."
+          find . -name "go.mod" -type f | while read -r gomod; do
+            dir=$(dirname "$gomod")
+            echo "Running go mod tidy in $dir"
+            (cd "$dir" && go mod tidy)
+          done
+
+      - name: Check for uncommitted changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Error: Uncommitted changes found after running go mod tidy"
+            echo "Changed files:"
+            git status --porcelain
+            echo ""
+            echo "Diff:"
+            git diff
+            exit 1
+          else
+            echo "Success: No uncommitted changes found"
+          fi
